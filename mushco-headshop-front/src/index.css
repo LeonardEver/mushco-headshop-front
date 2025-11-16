@@ -1,0 +1,315 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400;600;700&family=Orbitron:wght@400;700;900&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* MJ HeadShop Design System */
+@layer base {
+  :root {
+    --background: 45 25% 94%; /* Creme off-white */
+    --foreground: 0 0% 10%; /* Preto suave */
+
+    --card: 45 25% 98%; /* Creme claro para cards */
+    --card-foreground: 0 0% 10%;
+
+    --popover: 45 25% 98%;
+    --popover-foreground: 0 0% 10%;
+
+    --primary: 90 25% 35%; /* Verde musgo natural */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 45 30% 88%; /* Bege claro natural */
+    --secondary-foreground: 0 0% 15%;
+
+    --muted: 45 20% 85%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 270 80% 45%; /* Roxo vibrante do olho */
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 45 20% 82%;
+    --input: 45 25% 98%;
+    --ring: 120 60% 15%;
+
+    --radius: 0.75rem;
+
+    /* MJ HeadShop colors */
+    --mj-green: 90 25% 35%; /* Verde musgo natural do cogumelo */
+    --mj-green-light: 90 20% 75%; /* Verde claro natural */
+    --mj-green-stem: 45 35% 75%; /* Bege esverdeado do caule */
+    --mj-purple: 270 80% 45%; /* Roxo do olho */
+    --mj-purple-vibrant: 270 100% 60%;
+    --mj-orange: 25 100% 52%;
+    --mj-cream: 45 35% 92%; /* Creme natural */
+    --mj-cream-light: 45 40% 96%;
+    --mj-dark: 0 0% 10%;
+  }
+
+  .dark {
+    --background: 45 25% 94%;
+    --foreground: 0 0% 10%;
+    --card: 45 25% 98%;
+    --card-foreground: 0 0% 10%;
+    --popover: 45 25% 98%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 120 60% 15%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 120 40% 85%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 45 15% 88%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 270 100% 30%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 45 20% 82%;
+    --input: 45 25% 98%;
+    --ring: 120 60% 15%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background: #F7F3E9; /* Creme off-white */
+    min-height: 100vh;
+    font-family: 'Chakra Petch', system-ui, sans-serif;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20% 30%, rgba(34, 139, 34, 0.02) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(120, 53, 180, 0.01) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+  }
+}
+
+@layer components {
+  /* MJ HeadShop Gradients */
+  .mj-green-gradient {
+    background: linear-gradient(135deg, hsl(90, 25%, 35%) 0%, hsl(90, 30%, 40%) 100%);
+  }
+  
+  .mj-green-light-gradient {
+    background: linear-gradient(135deg, hsl(90, 20%, 75%) 0%, hsl(90, 25%, 70%) 100%);
+  }
+  
+  .mj-purple-gradient {
+    background: linear-gradient(135deg, hsl(270, 80%, 45%) 0%, hsl(270, 100%, 60%) 100%);
+  }
+  
+  .mj-orange-gradient {
+    background: linear-gradient(135deg, #FF6B00 0%, #FF8F00 100%);
+  }
+  
+  .mj-cream-gradient {
+    background: linear-gradient(135deg, #F7F3E9 0%, #F0EBDD 100%);
+  }
+
+  /* Professional Cards */
+  .mj-card {
+    background: hsl(45, 40%, 96%); /* Creme natural muito claro */
+    @apply rounded-xl shadow-lg border border-gray-200;
+    transition: all 0.3s ease;
+  }
+  
+  .mj-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px hsla(90, 25%, 35%, 0.15);
+  }
+  
+  /* Professional Buttons */
+  .btn-mj-primary {
+    @apply px-6 py-3 rounded-lg font-bold text-white relative overflow-hidden transition-all duration-300;
+    background: hsl(90, 25%, 35%); /* Verde musgo */
+    box-shadow: 0 4px 15px hsla(90, 25%, 35%, 0.3);
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 700;
+  }
+  
+  .btn-mj-primary:hover {
+    background: hsl(90, 30%, 40%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px hsla(90, 25%, 35%, 0.4);
+  }
+
+  .btn-mj-secondary {
+    @apply px-6 py-3 rounded-lg font-bold transition-all duration-300;
+    background: hsl(45, 40%, 96%); /* Creme natural */
+    color: hsl(90, 25%, 35%); /* Verde musgo */
+    border: 2px solid hsl(90, 25%, 35%);
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 700;
+  }
+  
+  .btn-mj-secondary:hover {
+    background: hsl(90, 25%, 35%);
+    color: hsl(45, 40%, 96%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px hsla(90, 25%, 35%, 0.3);
+  }
+
+  /* Professional Glow Text */
+  .mj-glow-green {
+    color: #1B5E20;
+    text-shadow: 
+      0 0 10px rgba(27, 94, 32, 0.3),
+      0 0 20px rgba(27, 94, 32, 0.2);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+  }
+
+  .mj-glow-purple {
+    color: #6C00FF;
+    text-shadow: 
+      0 0 10px rgba(108, 0, 255, 0.3),
+      0 0 20px rgba(108, 0, 255, 0.2);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+  }
+
+  .mj-glow-white {
+    color: #FDFCF8;
+    text-shadow: 
+      0 0 10px rgba(27, 94, 32, 0.5),
+      0 0 20px rgba(27, 94, 32, 0.3),
+      0 0 30px rgba(27, 94, 32, 0.2);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+  }
+
+  /* Header styling */
+  .mj-header {
+    background: hsl(90, 25%, 35%); /* Verde musgo natural */
+    position: relative;
+  }
+
+  .mj-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  /* Typography */
+  .mj-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    letter-spacing: 1px;
+  }
+
+  .mj-text {
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 600;
+  }
+
+  .mj-body-text {
+    font-family: 'Chakra Petch', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  /* Offer seals */
+  .mj-seal-orange {
+    background: #FF6B00;
+    color: white;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+}
+
+/* Professional Animations */
+@keyframes mj-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes mj-glow-pulse {
+  0%, 100% {
+    text-shadow: 
+      0 0 10px rgba(27, 94, 32, 0.3),
+      0 0 20px rgba(27, 94, 32, 0.2);
+  }
+  50% {
+    text-shadow: 
+      0 0 15px rgba(27, 94, 32, 0.5),
+      0 0 30px rgba(27, 94, 32, 0.3),
+      0 0 40px rgba(27, 94, 32, 0.2);
+  }
+}
+
+@keyframes mj-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-mj-float {
+  animation: mj-float 3s ease-in-out infinite;
+}
+
+.animate-mj-glow-pulse {
+  animation: mj-glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-mj-shimmer {
+  animation: mj-shimmer 2s ease-in-out infinite;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F7F3E9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #1B5E20, #2E7D32);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #2E7D32, #388E3C);
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .mj-glow-green, .mj-glow-purple, .mj-glow-white {
+    text-shadow: 
+      0 0 5px rgba(27, 94, 32, 0.3),
+      0 0 10px rgba(27, 94, 32, 0.2);
+  }
+  
+  .btn-mj-primary, .btn-mj-secondary {
+    @apply px-4 py-2 text-sm;
+  }
+}
