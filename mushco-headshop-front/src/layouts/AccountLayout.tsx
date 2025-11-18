@@ -11,7 +11,6 @@ interface AccountLayoutProps {
 export function AccountLayout({ children }: { children: ReactNode }) {
   return (
     <>
-      <Header />
       <SidebarProvider>
         <div className="container mx-auto flex flex-col md:flex-row gap-8 py-8 pt-24">
           <AccountSidebar />
@@ -25,7 +24,6 @@ export function AccountLayout({ children }: { children: ReactNode }) {
           </main>
         </div>
       </SidebarProvider>
-      <Footer />
     </>
   );
 }

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, User, Heart, ShoppingCart, Menu, X, Leaf, Package, MapPin, Wallet, Settings, LogOut } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
@@ -16,13 +17,13 @@ import {
 
 const Header = () => {
   const { data: categories = [] } = useCategories();
-  const { state, dispatch } = useStore();
+  const { cart, favorites } = useStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
-  const cartItemsCount = state.cart.reduce((sum, item) => sum + item.quantity, 0);
-  const favoritesCount = state.favorites.length;
+  const cartItemsCount = cart?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+  const favoritesCount = favorites?.length ?? 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
