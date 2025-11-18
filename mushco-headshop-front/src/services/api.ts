@@ -26,8 +26,6 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-// --- FIM CORREÇÃO INTERCEPTOR ---
-
 
 // Interceptor para lidar com respostas de erro (Mantido)
 api.interceptors.response.use(
@@ -40,7 +38,6 @@ api.interceptors.response.use(
 
 // Serviços para Products
 export const productService = {
-  // Buscar todos os produtos
   getAll: async (): Promise<Product[]> => {
     const response = await api.get('/products');
     return response.data.data; 
@@ -99,7 +96,6 @@ export const orderService = {
     const response = await api.post('/orders', orderData);
     return response.data.data; 
   },
-  // CORREÇÃO: Removemos o userId do parâmetro, o token já o fornece.
   getUserOrders: async (): Promise<Order[]> => {
     const response = await api.get('/orders'); 
     return response.data.data; 
@@ -116,7 +112,6 @@ export const orderService = {
 
 // Serviços para Cart
 export const cartService = {
-  // Funções que o seu StoreContext usa:
   addItem: async (productId: string, quantity: number): Promise<any> => {
     const response = await api.post('/cart', { productId, quantity });
     return response.data.data;
@@ -126,12 +121,32 @@ export const cartService = {
     return response.data.data; 
   },
   removeItem: async (itemId: string): Promise<void> => {
+    // No back-end, o cartController.ts espera o ID DO ITEM (cart_item_id)
     await api.delete(`/cart/${itemId}`);
   },
   updateItem: async (itemId: string, quantity: number): Promise<any> => {
+    // No back-end, o cartController.ts espera o ID DO ITEM (cart_item_id)
     const response = await api.put(`/cart/${itemId}`, { quantity });
     return response.data.data;
   }
 };
+
+// -----------------------------------------------------------------
+// <-- NOVO SERVIÇO DE FAVORITOS -->
+// -----------------------------------------------------------------
+export const favoriteService = {
+  getAll: async (): Promise<Product[]> => {
+    const response = await api.get('/favorites');
+    return response.data.data;
+  },
+  add: async (productId: string): Promise<any> => {
+    const response = await api.post('/favorites', { productId });
+    return response.data.data;
+  },
+  remove: async (productId: string): Promise<void> => {
+    await api.delete(`/favorites/${productId}`);
+  },
+};
+// -----------------------------------------------------------------
 
 export default api;

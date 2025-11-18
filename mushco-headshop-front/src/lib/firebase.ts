@@ -5,12 +5,13 @@ import { getStorage } from 'firebase/storage';
 
 // TODO: Substituir pelas suas configurações do Firebase
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN", 
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyA8bWUqgK1UngXFrpVskemTl_Mw9mjAg4I",
+  authDomain: "mush-co-e95b4.firebaseapp.com",
+  projectId: "mush-co-e95b4",
+  storageBucket: "mush-co-e95b4.firebasestorage.app",
+  messagingSenderId: "216697201651",
+  appId: "1:216697201651:web:659443806ff03901fae886",
+  measurementId: "G-MZZ4D5D7YW"
 };
 
 // Initialize Firebase

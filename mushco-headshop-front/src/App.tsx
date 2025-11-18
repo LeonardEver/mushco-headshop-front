@@ -1,68 +1,74 @@
+// 1. BrowserRouter foi REMOVIDO dos imports
+import { Routes, Route, Outlet } from 'react-router-dom';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { StoreProvider } from "./context/StoreContext";
-import Index from "./pages/Index";
-import ProductDetail from "./pages/ProductDetail";
-import Category from "./pages/Category";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import Favorites from "./pages/Favorites";
-import OrderConfirmation from "./pages/OrderConfirmation";
-import Auth from "./pages/Auth";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import FAQ from "./pages/FAQ";
-import Returns from "./pages/Returns";
-import NotFound from "./pages/NotFound";
-import Account from "./pages/Account";
-import MyOrders from "./pages/MyOrders";
-import MyData from "./pages/MyData";
-import MyAddress from "./pages/MyAddress";
-import Support from "./pages/Support";
-import Wallet from "./pages/Wallet";
+// Importar todas as suas páginas
+import Index from './pages/Index';
+import About from './pages/About';
+import Cart from './pages/Cart';
+import Auth from './pages/Auth';
+import Category from './pages/Category';
+import ProductDetail from './pages/ProductDetail';
+import Checkout from './pages/Checkout';
+import OrderConfirmation from './pages/OrderConfirmation';
+import Contact from './pages/Contact';
+import FAQ from './pages/FAQ';
+import Returns from './pages/Returns';
+import Support from './pages/Support';
+import NotFound from './pages/NotFound';
 
-const queryClient = new QueryClient();
+// Importar Layouts e Páginas da Conta
+import { AccountLayout } from '@/layouts/AccountLayout';
+import Account from './pages/Account';
+import MyOrders from './pages/MyOrders';
+import MyData from './pages/MyData';
+import MyAddress from './pages/MyAddress';
+import Favorites from './pages/Favorites';
+import Wallet from './pages/Wallet';
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <StoreProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/produto/:id" element={<ProductDetail />} />
-            <Route path="/categoria/:slug" element={<Category />} />
-            <Route path="/carrinho" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/favoritos" element={<Favorites />} />
-            <Route path="/pedido-confirmado" element={<OrderConfirmation />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/sobre" element={<About />} />
-            <Route path="/contato" element={<Contact />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/trocas-devolucoes" element={<Returns />} />
-            <Route path="/mais-vendidos" element={<Category />} />
-            <Route path="/lancamentos" element={<Category />} />
-            <Route path="/promocoes" element={<Category />} />
-            <Route path="/minha-conta" element={<Account />} />
-            <Route path="/minha-conta/pedidos" element={<MyOrders />} />
-            <Route path="/minha-conta/dados" element={<MyData />} />
-            <Route path="/minha-conta/endereco" element={<MyAddress />} />
-            <Route path="/minha-conta/atendimento" element={<Support />} />
-            <Route path="/minha-conta/carteira" element={<Wallet />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </StoreProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+
+function App() {
+  return (
+    // 2. <BrowserRouter> foi substituído por um Fragmento <>
+    <>
+      <Header />
+      <Routes>
+        {/* Rotas Principais */}
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/category/:slug" element={<Category />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
+        
+        {/* Rotas de Checkout */}
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-confirmation" element={<OrderConfirmation />} />
+
+        {/* Rotas da Conta (dentro do Layout da Conta) */}
+        <Route path="/account" element={<AccountLayout><Outlet /></AccountLayout>}>
+          <Route index element={<Account />} />
+          <Route path="orders" element={<MyOrders />} />
+          <Route path="data" element={<MyData />} />
+          <Route path="address" element={<MyAddress />} />
+          <Route path="favorites" element={<Favorites />} />
+          <Route path="wallet" element={<Wallet />} />
+        </Route>
+
+        {/* Rotas de Rodapé */}
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/returns" element={<Returns />} />
+        <Route path="/support" element={<Support />} />
+        
+        {/* Rota 404 */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Footer />
+    </>
+    // 3. Fim do Fragmento
+  );
+}
 
 export default App;

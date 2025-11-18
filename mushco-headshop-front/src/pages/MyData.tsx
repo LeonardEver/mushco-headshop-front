@@ -5,11 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { AccountLayout } from '@/layouts/AccountLayout';
-import { useStore } from '@/context/StoreContext';
+// import { useStore } from '@/context/StoreContext'; // <-- NÃO VAMOS MAIS USAR
+import { useAuth } from '@/hooks/useAuth'; // <-- VAMOS USAR O USUÁRIO REAL
 
 const MyData = () => {
-  const { state } = useStore();
+  // const { state } = useStore(); // <-- REMOVIDO
+  const { user } = useAuth(); // <-- USANDO O USUÁRIO AUTENTICADO DO FIREBASE
   const [isEditing, setIsEditing] = useState(false);
+
+  // NOTA: O 'user' do Firebase pode não ter todos os dados do seu DB (ex: telefone)
+  // No futuro, você pode querer criar uma rota /api/users/me que busca
+  // os dados do Postgres e mescla com os dados do Firebase.
+  // Por agora, vamos usar os dados do Firebase.
 
   return (
     <AccountLayout>
@@ -26,7 +33,7 @@ const MyData = () => {
                 <CardTitle className="mj-text">Informações Pessoais</CardTitle>
                 <CardDescription className="mj-text">Seus dados cadastrais</CardDescription>
               </div>
-              <Button 
+              <Button
                 variant={isEditing ? "outline" : "default"}
                 onClick={() => setIsEditing(!isEditing)}
                 className="mj-text"
@@ -42,9 +49,10 @@ const MyData = () => {
                   <User className="h-4 w-4" />
                   <span>Nome Completo</span>
                 </Label>
-                <Input 
-                  id="name" 
-                  defaultValue={state.user?.name} 
+                <Input
+                  id="name"
+                  // O 'user' do Firebase tem 'displayName'
+                  defaultValue={user?.displayName || ''} 
                   disabled={!isEditing}
                   className="mj-text"
                 />
@@ -55,10 +63,10 @@ const MyData = () => {
                   <Mail className="h-4 w-4" />
                   <span>Email</span>
                 </Label>
-                <Input 
-                  id="email" 
-                  type="email" 
-                  defaultValue={state.user?.email} 
+                <Input
+                  id="email"
+                  type="email"
+                  defaultValue={user?.email || ''}
                   disabled={!isEditing}
                   className="mj-text"
                 />
@@ -69,10 +77,12 @@ const MyData = () => {
                   <Phone className="h-4 w-4" />
                   <span>Telefone</span>
                 </Label>
-                <Input 
-                  id="phone" 
-                  type="tel" 
-                  placeholder="(11) 99999-9999" 
+                <Input
+                  id="phone"
+                  type="tel"
+                  // O 'user' do Firebase tem 'phoneNumber'
+                  defaultValue={user?.phoneNumber || ''} 
+                  placeholder="(11) 99999-9999"
                   disabled={!isEditing}
                   className="mj-text"
                 />
@@ -83,11 +93,13 @@ const MyData = () => {
                   <Calendar className="h-4 w-4" />
                   <span>Data de Nascimento</span>
                 </Label>
-                <Input 
-                  id="birthdate" 
-                  type="date" 
+                <Input
+                  id="birthdate"
+                  type="date"
                   disabled={!isEditing}
                   className="mj-text"
+                  // Data de nascimento não existe no Firebase,
+                  // você precisaria salvar isso no seu Postgres.
                 />
               </div>
             </div>
@@ -98,6 +110,7 @@ const MyData = () => {
                   Cancelar
                 </Button>
                 <Button onClick={() => setIsEditing(false)} className="mj-text">
+                  {/* TODO: Implementar a chamada de API para salvar dados */}
                   Salvar Alterações
                 </Button>
               </div>
@@ -105,6 +118,8 @@ const MyData = () => {
           </CardContent>
         </Card>
 
+        {/* O 'user' do Firebase não tem senha local se logou com Google */}
+        {/* Você pode querer esconder isso ou usar o "password reset" do Firebase */}
         <Card>
           <CardHeader>
             <CardTitle className="mj-text">Segurança</CardTitle>
