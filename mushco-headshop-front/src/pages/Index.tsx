@@ -20,7 +20,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       
       <main>
         {/* Hero Banner */}
@@ -268,7 +267,6 @@ const Index = () => {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 };

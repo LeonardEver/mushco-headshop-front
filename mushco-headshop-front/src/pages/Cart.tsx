@@ -2,8 +2,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ArrowLeft, ShoppingBag } from 'lucide-react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { useStore } from '../context/StoreContext';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
@@ -40,7 +38,6 @@ const Cart = () => {
   if (state.cart.length === 0) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <main className="container mx-auto px-4 py-16">
           <div className="text-center space-y-6">
             <ShoppingBag className="w-24 h-24 text-gray-300 mx-auto" />
@@ -53,14 +50,12 @@ const Cart = () => {
             </Link>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
@@ -197,8 +192,6 @@ const Cart = () => {
           </div>
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };
