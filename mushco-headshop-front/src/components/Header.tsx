@@ -16,14 +16,19 @@ import {
 } from './ui/dropdown-menu';
 
 const Header = () => {
+  
   const { data: categories = [] } = useCategories();
   const { cart, favorites } = useStore();
+  const { isAuthenticated, user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
+  
+
   const cartItemsCount = cart?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
   const favoritesCount = favorites?.length ?? 0;
+  
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +43,9 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    dispatch({ type: 'LOGOUT' });
+    if (logout) {
+      logout();
+    }
   };
 
   return (
@@ -96,16 +103,16 @@ const Header = () => {
             {/* Desktop User Actions */}
             <div className="hidden md:flex items-center space-x-3">
               {/* User Menu */}
-              {state.isAuthenticated ? (
+              {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <div className="flex items-center space-x-3 bg-white/10 rounded-lg px-3 py-2 backdrop-blur-sm cursor-pointer hover:bg-white/20 transition-all duration-300">
                       <img 
-                        src={state.user?.avatar} 
-                        alt={state.user?.name}
+                        src={user?.photoURL} 
+                        alt={user?.displayName}
                         className="w-8 h-8 rounded-full border-2 border-white/30"
                       />
-                      <span className="text-sm text-white font-semibold mj-text">{state.user?.name}</span>
+                      <span className="text-sm text-white font-semibold mj-text">{user?.displayName}</span>
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-popover">
@@ -182,7 +189,7 @@ const Header = () => {
             {/* Mobile Actions */}
             <div className="flex md:hidden items-center space-x-3">
               {/* Mobile Auth/User Actions - Show different buttons based on auth state */}
-              {state.isAuthenticated ? (
+              {isAuthenticated ? (
                 <>
                   {/* Favorites */}
                   <Link to="/favoritos" className="relative p-3 hover:bg-white/20 rounded-lg transition-all duration-300 group">
@@ -248,18 +255,18 @@ const Header = () => {
           </form>
 
           {/* Mobile User Info - Only show when authenticated */}
-          {state.isAuthenticated && (
+          {isAuthenticated && (
             <div className="mt-4 md:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <div className="flex items-center justify-between bg-white/10 rounded-lg p-3 backdrop-blur-sm cursor-pointer hover:bg-white/20 transition-all duration-300">
                     <div className="flex items-center space-x-3">
                       <img 
-                        src={state.user?.avatar} 
-                        alt={state.user?.name}
+                        src={user?.photoURL} 
+                        alt={user?.displayName}
                         className="w-8 h-8 rounded-full border-2 border-white/30"
                       />
-                      <span className="text-sm text-white font-semibold mj-text">{state.user?.name}</span>
+                      <span className="text-sm text-white font-semibold mj-text">{user?.displayName}</span>
                     </div>
                   </div>
                 </DropdownMenuTrigger>

@@ -1,10 +1,12 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, Star, Zap, Flame } from 'lucide-react';
 import { Product } from '../types';
 import { useStore } from '../context/StoreContext';
 import { Button } from './ui/button';
+// AVISO: O 'toast' que você está importando é do 'sonner'.
+// O 'StoreContext' usa o 'use-toast' (que é o Toaster do ShadCN).
+// Vou manter o 'sonner' por enquanto, mas saiba que são sistemas diferentes.
 import { toast } from 'sonner';
 
 interface ProductCardProps {
@@ -12,24 +14,35 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { state, dispatch } = useStore();
-  const isFavorite = state.favorites.includes(product.id);
+  // --- CORREÇÃO AQUI ---
+  // Trocamos state/dispatch pelas funções e dados reais do contexto
+  const { isFavorite, toggleFavorite, addToCart } = useStore();
+
+  // Chamamos a função 'isFavorite' do contexto para saber o estado
+  const isFav = isFavorite(product.id);
+  // --- FIM DA CORREÇÃO ---
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    dispatch({ type: 'ADD_TO_CART', payload: product });
+    // --- CORREÇÃO AQUI ---
+    // Usamos a função 'addToCart' (productId, quantity)
+    addToCart(product.id, 1);
     toast.success(`${product.name} adicionado ao carrinho! 🛒`);
   };
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isFavorite) {
-      dispatch({ type: 'REMOVE_FROM_FAVORITES', payload: product.id });
+    
+    // --- CORREÇÃO AQUI ---
+    // Apenas chamamos a função 'toggleFavorite'
+    toggleFavorite(product.id);
+
+    // O 'StoreContext' não tem toasts para favoritos, então mantemos estes.
+    if (isFav) {
       toast.info('Removido dos favoritos 💔');
     } else {
-      dispatch({ type: 'ADD_TO_FAVORITES', payload: product.id });
       toast.success('Adicionado aos favoritos! 💚');
     }
   };
@@ -72,7 +85,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         >
           <Heart 
             className={`w-5 h-5 transition-colors ${
-              isFavorite ? 'fill-red-500 text-red-500' : 'text-white hover:text-red-400'
+              // --- CORREÇÃO AQUI ---
+              // Usamos a variável 'isFav'
+              isFav ? 'fill-red-500 text-red-500' : 'text-white hover:text-red-400'
             }`} 
           />
         </button>
