@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosHeaders } from 'axios';
 import { Product, Category, Order } from '@/types';
 import { auth } from '@/lib/firebase';
 
@@ -10,16 +10,30 @@ const api = axios.create({
   baseURL: VITE_API_BASE_URL,
 });
 
-
+// Interceptor de Requisição (Anexa o Token)
 api.interceptors.request.use(
   async (config) => { 
     const user = auth.currentUser;
-    if (user) {
-      // Obtém o Token ID (JWT) do Firebase
-      const token = await user.getIdToken();
-      // Anexa o token para o Back-end verificar
-      config.headers.Authorization = `Bearer ${token}`;
+    
+    // Garantir que headers existam
+    if (!config.headers) {
+      config.headers = new AxiosHeaders();
     }
+
+    if (user) {
+      try {
+        // Obtém o Token ID (JWT) do Firebase
+        // Forçar refresh=false é o padrão, mas garante performance
+        const token = await user.getIdToken();
+        
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error("Erro ao obter token de autenticação:", error);
+      }
+    }
+    
     return config;
   },
   (error) => {
@@ -27,11 +41,21 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para lidar com respostas de erro (Mantido)
+// Interceptor de Resposta (Trata Erros Globais)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error);
+    if (error.response) {
+      // Log mais claro para depuração
+      console.error(`API Error ${error.response.status} em ${error.config.url}:`, error.response.data);
+
+      // Opcional: Se receber 401, pode significar token inválido ou usuário não encontrado no DB
+      if (error.response.status === 401) {
+        console.warn("Autenticação falhou. Verifique se o Backend está validando o token do Firebase corretamente.");
+      }
+    } else {
+      console.error('API Connection Error:', error.message);
+    }
     return Promise.reject(error);
   }
 );
@@ -50,7 +74,7 @@ export const productService = {
     const response = await api.get(`/products/category/${category}`);
     return response.data.data; 
   },
-  search: async (params: { /* ... */ }): Promise<{ products: Product[]; total: number; page: number; totalPages: number }> => {
+  search: async (params: { query?: string; page?: number; limit?: number }) => {
     const response = await api.get('/products/search', { params });
     return response.data.data; 
   },
@@ -121,19 +145,15 @@ export const cartService = {
     return response.data.data; 
   },
   removeItem: async (itemId: string): Promise<void> => {
-    // No back-end, o cartController.ts espera o ID DO ITEM (cart_item_id)
     await api.delete(`/cart/${itemId}`);
   },
   updateItem: async (itemId: string, quantity: number): Promise<any> => {
-    // No back-end, o cartController.ts espera o ID DO ITEM (cart_item_id)
     const response = await api.put(`/cart/${itemId}`, { quantity });
     return response.data.data;
   }
 };
 
-// -----------------------------------------------------------------
-// <-- NOVO SERVIÇO DE FAVORITOS -->
-// -----------------------------------------------------------------
+// Serviços para Favoritos
 export const favoriteService = {
   getAll: async (): Promise<Product[]> => {
     const response = await api.get('/favorites');
@@ -147,6 +167,5 @@ export const favoriteService = {
     await api.delete(`/favorites/${productId}`);
   },
 };
-// -----------------------------------------------------------------
 
 export default api;
