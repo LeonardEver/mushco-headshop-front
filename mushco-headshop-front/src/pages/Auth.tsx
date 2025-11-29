@@ -1,23 +1,33 @@
-
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { useStore } from '../context/StoreContext';
+import { ArrowLeft, Mail, Lock, User as UserIcon, Eye, EyeOff, Loader2 } from 'lucide-react';
+// import Header from '../components/Header'; // Remova se já estiver no App.tsx para evitar duplicação
+// import Footer from '../components/Footer'; // Remova se já estiver no App.tsx
+import { useAuth } from '@/hooks/useAuth'; // Use o Hook correto
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 
 const Auth = () => {
-  const { dispatch } = useStore();
+  // NÃO usamos mais o dispatch do StoreContext para auth, usamos o useAuth (Firebase)
+  const { signInWithGoogle, loginWithEmail, registerWithEmail, isAuthenticated } = useAuth();
+  
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
   });
+
+  // Se já estiver logado, redireciona
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -26,33 +36,38 @@ const Auth = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulação de login/cadastro
-    const mockUser = {
-      id: '1',
-      name: formData.name || 'Usuário',
-      email: formData.email,
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face'
-    };
-    dispatch({ type: 'LOGIN', payload: mockUser });
-    navigate('/');
+    setIsLoading(true);
+
+    try {
+      if (isLogin) {
+        // Login Real
+        await loginWithEmail(formData.email, formData.password);
+      } else {
+        // Cadastro Real
+        await registerWithEmail(formData.name, formData.email, formData.password);
+      }
+      // O redirecionamento acontece pelo useEffect ou aqui
+      navigate('/');
+    } catch (error) {
+      // Erro já tratado com toast no Contexto
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleGoogleLogin = () => {
-    // Simulação de login com Google
-    const mockUser = {
-      id: '1',
-      name: 'João Silva',
-      email: 'joao@gmail.com',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face'
-    };
-    dispatch({ type: 'LOGIN', payload: mockUser });
-    navigate('/');
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithGoogle();
+      navigate('/');
+    } catch (error) {
+      // Erro tratado no contexto
+    }
   };
 
   return (
-    <div className="min-h-screen bg-kraft-light">
+    <div className="min-h-screen bg-kraft-light pt-24"> {/* Adicionado pt-24 para não ficar sob o header se ele for global */}
       
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
@@ -67,7 +82,7 @@ const Auth = () => {
 
         <div className="max-w-md mx-auto">
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-purple-100">
-            {/* Header */}
+            {/* Header Form */}
             <div className="text-center mb-8">
               <div className="w-16 h-16 mj-purple-vibrant-gradient rounded-xl flex items-center justify-center text-white font-bold mx-auto mb-4">
                 <span className="mj-title text-xl">MC</span>
@@ -84,6 +99,7 @@ const Auth = () => {
             <Button
               onClick={handleGoogleLogin}
               variant="outline"
+              type="button"
               className="w-full mb-6 h-12 border-2 border-gray-200 hover:border-mush-purple hover:bg-purple-50 transition-all duration-300"
             >
               <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
@@ -109,7 +125,7 @@ const Auth = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <Input
                     type="text"
                     name="name"
@@ -157,9 +173,10 @@ const Auth = () => {
 
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 btn-mj-primary text-white font-bold"
               >
-                {isLogin ? 'Entrar' : 'Criar conta'}
+                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (isLogin ? 'Entrar' : 'Criar conta')}
               </Button>
             </form>
 
@@ -168,6 +185,7 @@ const Auth = () => {
               <p className="text-gray-600">
                 {isLogin ? 'Não tem uma conta?' : 'Já tem uma conta?'}
                 <button
+                  type="button"
                   onClick={() => setIsLogin(!isLogin)}
                   className="ml-2 text-mush-purple hover:text-purple-700 font-semibold"
                 >
@@ -175,15 +193,6 @@ const Auth = () => {
                 </button>
               </p>
             </div>
-
-            {/* Links */}
-            {isLogin && (
-              <div className="text-center mt-4">
-                <Link to="#" className="text-sm text-gray-500 hover:text-mush-purple">
-                  Esqueceu sua senha?
-                </Link>
-              </div>
-            )}
           </div>
         </div>
       </main>
