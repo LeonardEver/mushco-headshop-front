@@ -69,7 +69,7 @@ const Wallet = () => {
 
         <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
           <CardContent className="pt-6">
-            <div className="space-y-4">
+            <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm opacity-90 mj-text">Saldo Disponível</p>

@@ -51,6 +51,8 @@ const Category = () => {
 
   return (
     <div className="min-h-screen bg-background">
+
+      
       
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
@@ -82,6 +84,16 @@ const Category = () => {
             </div>
           </div>
         </div>
+
+        {sortedProducts.length === 0 && (
+          <div className="text-center py-16">
+            <h3 className="text-xl font-semibold mb-2">Nenhum produto encontrado</h3>
+            <p className="text-gray-600 mb-4">Tente ajustar seus filtros ou explore outras categorias</p>
+            <Button onClick={() => navigate('/')}>
+              Voltar ao início
+            </Button>
+          </div>
+        )}
 
         {/* Filters and Sort */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-white p-4 rounded-lg shadow-sm">
@@ -133,17 +145,6 @@ const Category = () => {
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
-
-        {/* Empty State */}
-        {sortedProducts.length === 0 && (
-          <div className="text-center py-16">
-            <h3 className="text-xl font-semibold mb-2">Nenhum produto encontrado</h3>
-            <p className="text-gray-600 mb-4">Tente ajustar seus filtros ou explore outras categorias</p>
-            <Button onClick={() => navigate('/')}>
-              Voltar ao início
-            </Button>
-          </div>
-        )}
       </main>
 
     </div>
