@@ -1,257 +1,176 @@
-
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Heart, ShoppingCart, Star, Truck, Shield, ArrowLeft } from 'lucide-react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import ProductCard from '../components/ProductCard';
-import { useProducts } from '../hooks/useProducts';
-import { useStore } from '../context/StoreContext';
-import { Button } from '../components/ui/button';
-import { toast } from 'sonner';
+import { useParams, Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, Minus, Plus, ShoppingCart, Heart, Share2, Loader2, Star, Truck, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useStore } from '@/context/StoreContext';
+import { productService } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 
 const ProductDetail = () => {
-  const { data: products = [] } = useProducts();
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { state, dispatch } = useStore();
+  const { addToCart, toggleFavorite, isFavorite } = useStore(); // Uso correto do Contexto
+  const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
 
-  const product = products.find(p => p.id === id);
-  const relatedProducts = products
-    .filter(p => p.category === product?.category && p.id !== id)
-    .slice(0, 4);
+  const { data: product, isLoading, error } = useQuery({
+    queryKey: ['product', id],
+    queryFn: () => productService.getById(id || ''),
+    enabled: !!id,
+  });
 
-  if (!product) {
+  const handleAddToCart = () => {
+    if (product) {
+      addToCart(product.id, quantity);
+    }
+  };
+
+  const handleQuantityChange = (delta: number) => {
+    setQuantity(prev => Math.max(1, prev + delta));
+  };
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">Produto não encontrado</h1>
-          <Button onClick={() => navigate('/')}>Voltar ao início</Button>
-        </div>
-        <Footer />
+      <div className="min-h-screen flex items-center justify-center pt-24">
+        <Loader2 className="w-8 h-8 animate-spin text-mush-purple" />
       </div>
     );
   }
 
-  const isFavorite = state.favorites.includes(product.id);
+  if (error || !product) {
+    return (
+      <div className="container mx-auto px-4 py-24 text-center">
+        <h2 className="text-2xl font-bold text-gray-800">Produto não encontrado</h2>
+        <Link to="/" className="text-mush-purple hover:underline mt-4 block">
+          Voltar para a loja
+        </Link>
+      </div>
+    );
+  }
 
-  const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      dispatch({ type: 'ADD_TO_CART', payload: product });
-    }
-    toast.success(`${quantity}x ${product.name} adicionado ao carrinho!`);
-  };
-
-  const handleToggleFavorite = () => {
-    if (isFavorite) {
-      dispatch({ type: 'REMOVE_FROM_FAVORITES', payload: product.id });
-      toast.info('Removido dos favoritos');
-    } else {
-      dispatch({ type: 'ADD_TO_FAVORITES', payload: product.id });
-      toast.success('Adicionado aos favoritos!');
-    }
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(price);
-  };
+  // Se images for undefined, usa array vazio
+  const images = product.images || [product.image];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center space-x-2 text-sm text-gray-500 mb-6">
-          <button onClick={() => navigate(-1)} className="flex items-center space-x-1 hover:text-green-600">
-            <ArrowLeft className="w-4 h-4" />
-            <span>Voltar</span>
-          </button>
-          <span>/</span>
-          <span className="capitalize">{product.category}</span>
-          <span>/</span>
-          <span className="text-gray-900">{product.name}</span>
-        </div>
+    <div className="container mx-auto px-4 py-8 animate-fade-in pt-24">
+      <Link to="/" className="inline-flex items-center text-gray-600 hover:text-mush-purple mb-8 transition-colors">
+        <ArrowLeft className="w-4 h-4 mr-2" />
+        Voltar para a loja
+      </Link>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Product Image */}
-          <div className="space-y-4">
-            <div className="aspect-square overflow-hidden rounded-xl bg-gray-100">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        {/* Galeria */}
+        <div className="space-y-4">
+          <div className="aspect-square bg-white rounded-2xl overflow-hidden shadow-lg border border-purple-100">
+            <img
+              src={images[selectedImage]}
+              alt={product.name}
+              className="w-full h-full object-contain p-4"
+            />
           </div>
-
-          {/* Product Info */}
-          <div className="space-y-6">
-            <div>
-              {/* Badges */}
-              <div className="flex space-x-2 mb-4">
-                {product.isBestSeller && (
-                  <span className="bg-red-500 text-white text-xs px-3 py-1 rounded-full">
-                    🔥 Mais Vendido
-                  </span>
-                )}
-                {product.isNew && (
-                  <span className="bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
-                    ✨ Novo
-                  </span>
-                )}
-                {product.discount && (
-                  <span className="bg-green-500 text-white text-xs px-3 py-1 rounded-full">
-                    -{product.discount}%
-                  </span>
-                )}
-              </div>
-
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
-
-              {/* Rating */}
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${
-                        i < Math.floor(product.rating)
-                          ? 'fill-yellow-400 text-yellow-400'
-                          : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-lg font-medium">{product.rating}</span>
-                <span className="text-gray-500">({product.reviewCount} avaliações)</span>
-              </div>
-
-              {/* Price */}
-              <div className="space-y-2 mb-6">
-                <div className="flex items-center space-x-3">
-                  <span className="text-3xl font-bold text-green-600">
-                    {formatPrice(product.price)}
-                  </span>
-                  {product.originalPrice && (
-                    <span className="text-xl text-gray-500 line-through">
-                      {formatPrice(product.originalPrice)}
-                    </span>
-                  )}
-                </div>
-                {product.discount && (
-                  <p className="text-green-600 font-medium">
-                    Você economiza {formatPrice(product.originalPrice! - product.price)}!
-                  </p>
-                )}
-              </div>
-
-              {/* Stock Status */}
-              <div className="mb-6">
-                <span className={`text-lg font-medium ${product.inStock ? 'text-green-600' : 'text-red-500'}`}>
-                  {product.inStock ? '✅ Em estoque' : '❌ Indisponível'}
-                </span>
-              </div>
-            </div>
-
-            {/* Quantity Selector */}
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <label className="text-lg font-medium">Quantidade:</label>
-                <div className="flex items-center border border-gray-300 rounded-lg">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-2 hover:bg-gray-100 transition-colors"
-                  >
-                    -
-                  </button>
-                  <span className="px-4 py-2 min-w-16 text-center">{quantity}</span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="px-3 py-2 hover:bg-gray-100 transition-colors"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="space-y-3">
-                <Button 
-                  onClick={handleAddToCart}
-                  disabled={!product.inStock}
-                  className="w-full btn-primary text-lg py-4"
+          {images.length > 1 && (
+            <div className="grid grid-cols-4 gap-4">
+              {images.map((img: string, index: number) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImage(index)}
+                  className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
+                    selectedImage === index ? 'border-mush-purple shadow-md' : 'border-transparent hover:border-purple-200'
+                  }`}
                 >
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  Adicionar ao Carrinho
-                </Button>
-                
-                <Button 
-                  onClick={handleToggleFavorite}
-                  variant="outline"
-                  className="w-full py-4"
-                >
-                  <Heart className={`w-5 h-5 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                  {isFavorite ? 'Remover dos Favoritos' : 'Adicionar aos Favoritos'}
-                </Button>
-              </div>
-            </div>
-
-            {/* Shipping Info */}
-            <div className="border border-gray-200 rounded-lg p-4 space-y-3">
-              <div className="flex items-center space-x-3">
-                <Truck className="w-5 h-5 text-green-600" />
-                <div>
-                  <p className="font-medium">Frete Grátis</p>
-                  <p className="text-sm text-gray-600">Para pedidos acima de R$ 200</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Shield className="w-5 h-5 text-blue-600" />
-                <div>
-                  <p className="font-medium">Compra Protegida</p>
-                  <p className="text-sm text-gray-600">Seus dados estão seguros</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Product Details */}
-        <div className="bg-white rounded-xl p-6 mb-12 shadow-sm">
-          <h2 className="text-2xl font-bold mb-4">Descrição do Produto</h2>
-          <p className="text-gray-700 mb-6 leading-relaxed">{product.description}</p>
-          
-          <h3 className="text-xl font-semibold mb-4">Características:</h3>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {product.features.map((feature, index) => (
-              <li key={index} className="flex items-center space-x-2">
-                <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Related Products */}
-        {relatedProducts.length > 0 && (
-          <section>
-            <h2 className="text-2xl font-bold mb-6">Produtos Relacionados</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                  <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                </button>
               ))}
             </div>
-          </section>
-        )}
-      </main>
+          )}
+        </div>
 
-      <Footer />
+        {/* Informações */}
+        <div className="space-y-8">
+          <div>
+            <div className="flex justify-between items-start">
+              <div>
+                <span className="text-sm text-mush-purple font-semibold bg-purple-50 px-3 py-1 rounded-full capitalize">
+                  {/* CORREÇÃO AQUI: product.category é string, não objeto */}
+                  {product.category || 'Geral'}
+                </span>
+                <h1 className="text-4xl font-bold text-gray-900 mt-4 mb-2 mj-title">{product.name}</h1>
+                
+                {/* Rating fictício se não vier do back */}
+                <div className="flex items-center space-x-1 mt-2">
+                   {[1,2,3,4,5].map(star => (
+                     <Star key={star} className={`w-4 h-4 ${star <= (product.rating || 5) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                   ))}
+                   <span className="text-sm text-gray-500 ml-2">({product.reviewCount || 0} avaliações)</span>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => toggleFavorite(product.id)}
+                  className={`p-2 rounded-full transition-colors ${
+                    isFavorite(product.id) ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                  }`}
+                >
+                  <Heart className={`w-6 h-6 ${isFavorite(product.id) ? 'fill-current' : ''}`} />
+                </button>
+                <button className="p-2 bg-gray-100 rounded-full text-gray-400 hover:bg-gray-200 hover:text-mush-purple transition-colors">
+                  <Share2 className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            <p className="text-3xl font-bold text-mush-purple mt-6">
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.price)}
+            </p>
+          </div>
+
+          <p className="text-gray-600 leading-relaxed text-lg">
+            {product.description}
+          </p>
+
+          <div className="space-y-6 pt-6 border-t border-gray-100">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center border-2 border-gray-200 rounded-xl">
+                <button
+                  onClick={() => handleQuantityChange(-1)}
+                  className="p-3 text-gray-600 hover:text-mush-purple hover:bg-purple-50 rounded-l-lg transition-colors"
+                  disabled={quantity <= 1}
+                >
+                  <Minus className="w-5 h-5" />
+                </button>
+                <span className="w-12 text-center font-bold text-lg">{quantity}</span>
+                <button
+                  onClick={() => handleQuantityChange(1)}
+                  className="p-3 text-gray-600 hover:text-mush-purple hover:bg-purple-50 rounded-r-lg transition-colors"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+              <Button 
+                onClick={handleAddToCart}
+                disabled={!product.inStock}
+                className="flex-1 h-14 text-lg font-bold btn-mj-primary shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all"
+              >
+                <ShoppingCart className="mr-2 w-5 h-5" />
+                {product.inStock ? 'Adicionar ao Carrinho' : 'Indisponível'}
+              </Button>
+            </div>
+          </div>
+          
+          <div className="border border-gray-200 rounded-lg p-4 flex gap-6 text-sm text-gray-600">
+             <div className="flex items-center gap-2">
+                <Truck className="w-5 h-5 text-green-600" />
+                <span>Frete grátis acima de R$ 200</span>
+             </div>
+             <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-blue-600" />
+                <span>Compra segura</span>
+             </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

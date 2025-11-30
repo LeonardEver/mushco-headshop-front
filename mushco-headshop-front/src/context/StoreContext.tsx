@@ -1,12 +1,10 @@
-import React, { createContext, useContext, ReactNode, useCallback } from 'react';
-// A CORREÇÃO ESTÁ AQUI (removido o 's' depois de '}')
+import React, { createContext, useContext, ReactNode } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { cartService, favoriteService } from '@/services/api';
 import { Product, CartItem } from '../types';
-import { useAuth } from '@/hooks/useAuth'; // O hook do seu FirebaseAuthContext
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
-// 1. O que o nosso contexto vai fornecer
 interface StoreContextType {
   // Carrinho
   cart: CartItem[] | undefined;
@@ -14,6 +12,7 @@ interface StoreContextType {
   addToCart: (productId: string, quantity: number) => void;
   removeFromCart: (itemId: string) => void;
   updateCartQuantity: (itemId: string, quantity: number) => void;
+  clearCart: () => void; // <--- Adicionado para o Checkout
   getCartTotal: () => number;
 
   // Favoritos
@@ -27,118 +26,119 @@ const StoreContext = createContext<StoreContextType | null>(null);
 
 export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
   
-  // 1. PEGAR O USUÁRIO REAL DO FIREBASE
   const { isAuthenticated } = useAuth();
 
-  // 2. BUSCAR DADOS REAIS DO CARRINHO (com React Query)
-  const { data: cart, isLoading: isLoadingCart } = useQuery({
+  // --- QUERIES (Busca de dados) ---
+  const { data: cartData, isLoading: isLoadingCart } = useQuery({
     queryKey: ['cart'],
     queryFn: cartService.get,
-    enabled: isAuthenticated, // Só busca o carrinho se o usuário estiver logado
+    enabled: isAuthenticated,
   });
 
-  // 3. BUSCAR DADOS REAIS DOS FAVORITOS (com React Query)
+  // Garante que o cart seja sempre um array, mesmo que a API retorne algo diferente
+  const cart = Array.isArray(cartData) ? cartData : (cartData?.items || []);
+
   const { data: favorites, isLoading: isLoadingFavorites } = useQuery({
     queryKey: ['favorites'],
     queryFn: favoriteService.getAll,
-    enabled: isAuthenticated, // Só busca favoritos se o usuário estiver logado
+    enabled: isAuthenticated,
   });
 
-  // --- MUTATIONS (Ações que mudam dados) ---
-
-  // Mutation para ADICIONAR AO CARRINHO
+  // --- MUTATIONS (Alteração de dados) ---
   const addMutation = useMutation({
     mutationFn: ({ productId, quantity }: { productId: string, quantity: number }) => 
       cartService.addItem(productId, quantity),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
-      toast({ title: "Produto adicionado!" });
+      toast.success("Produto adicionado!");
     },
-    onError: (err: Error) => { // Especificar o tipo do erro
-      toast({ title: "Erro ao adicionar produto", description: err.message, variant: 'destructive' });
-    }
+    onError: () => toast.error("Erro ao adicionar produto.")
   });
 
-  // Mutation para REMOVER DO CARRINHO
   const removeMutation = useMutation({
     mutationFn: cartService.removeItem,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart'] });
-      toast({ title: "Produto removido" });
+      toast.info("Produto removido.");
     },
   });
 
-  // Mutation para ATUALIZAR QUANTIDADE
   const updateMutation = useMutation({
     mutationFn: ({ itemId, quantity }: { itemId: string, quantity: number }) => 
       cartService.updateItem(itemId, quantity),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['cart'] }),
+  });
+
+  // Adicione a função clear no seu cartService (src/services/api.ts) se não existir
+  const clearCartMutation = useMutation({
+    mutationFn: async () => {
+        // Se sua API tiver rota de limpar: await cartService.clear();
+        // Caso contrário, deletamos um por um ou limpamos localmente
+        // Vamos assumir que existe:
+        try {
+            await cartService.clear(); 
+        } catch (e) {
+            console.error("Erro ao limpar carrinho via API", e);
+        }
+    }, 
     onSuccess: () => {
+      queryClient.setQueryData(['cart'], []); // Limpa localmente imediatamente
       queryClient.invalidateQueries({ queryKey: ['cart'] });
     },
   });
 
-  // Mutation para ADICIONAR FAVORITO
   const addFavoriteMutation = useMutation({
     mutationFn: favoriteService.add,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['favorites'] }),
   });
 
-  // Mutation para REMOVER FAVORITO
   const removeFavoriteMutation = useMutation({
     mutationFn: favoriteService.remove,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['favorites'] }),
   });
 
-  // --- FUNÇÕES EXPOSTAS (O que nossos componentes vão chamar) ---
-
+  // --- FUNÇÕES ---
   const addToCart = (productId: string, quantity: number) => {
+    if (!isAuthenticated) {
+        toast.error("Faça login para adicionar ao carrinho");
+        return;
+    }
     addMutation.mutate({ productId, quantity });
   };
 
-  const removeFromCart = (itemId: string) => {
-    removeMutation.mutate(itemId);
-  };
+  const removeFromCart = (itemId: string) => removeMutation.mutate(itemId);
 
   const updateCartQuantity = (itemId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(itemId);
-    } else {
-      updateMutation.mutate({ itemId, quantity });
-    }
+    if (quantity <= 0) removeFromCart(itemId);
+    else updateMutation.mutate({ itemId, quantity });
   };
+
+  const clearCart = () => clearCartMutation.mutate();
 
   const getCartTotal = () => {
     if (!cart) return 0;
-    // Assegurar que cart é um array antes de usar reduce
-    const cartArray = Array.isArray(cart) ? cart : cart.items || [];
-    return cartArray.reduce((total: number, item: CartItem) => total + (item.product.price * item.quantity), 0);
+    return cart.reduce((total: number, item: CartItem) => total + (item.product.price * item.quantity), 0);
   };
 
   const isFavorite = (productId: string) => {
-    return !!favorites?.find(fav => fav.id === productId);
+    return !!favorites?.find((fav: Product) => fav.id === productId);
   };
 
   const toggleFavorite = (productId: string) => {
-    if (isFavorite(productId)) {
-      removeFavoriteMutation.mutate(productId);
-    } else {
-      addFavoriteMutation.mutate(productId);
-    }
+    if (!isAuthenticated) return toast.error("Faça login para favoritar");
+    if (isFavorite(productId)) removeFavoriteMutation.mutate(productId);
+    else addFavoriteMutation.mutate(productId);
   };
 
   return (
     <StoreContext.Provider value={{
-      cart: Array.isArray(cart) ? cart : (cart?.items || []), // Garantir que 'cart' seja um array
+      cart,
       isLoadingCart,
       addToCart,
       removeFromCart,
       updateCartQuantity,
+      clearCart,
       getCartTotal,
       favorites,
       isLoadingFavorites,
@@ -152,8 +152,6 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
 
 export const useStore = () => {
   const context = useContext(StoreContext);
-  if (!context) {
-    throw new Error('useStore must be used within a StoreProvider');
-  }
+  if (!context) throw new Error('useStore must be used within a StoreProvider');
   return context;
 };

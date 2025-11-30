@@ -150,7 +150,10 @@ export const cartService = {
   updateItem: async (itemId: string, quantity: number): Promise<any> => {
     const response = await api.put(`/cart/${itemId}`, { quantity });
     return response.data.data;
-  }
+  },
+  clear: async () => {
+    await api.delete('/cart/clear');
+  },    
 };
 
 // Serviços para Favoritos
