@@ -1,91 +1,91 @@
-import { Package, Truck, CheckCircle2, Clock } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { AccountLayout } from '@/layouts/AccountLayout';
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Package } from "lucide-react";
+import api from "@/services/api"; // Certifique-se de importar sua instância axios configurada
+import { useToast } from "@/hooks/use-toast";
 
-const MyOrders = () => {
-  const orders = [
-    {
-      id: '#12345',
-      date: '15/11/2025',
-      total: 'R$ 249,90',
-      status: 'Entregue',
-      statusColor: 'bg-green-500',
-      icon: CheckCircle2,
-      items: 3,
-    },
-    {
-      id: '#12344',
-      date: '10/11/2025',
-      total: 'R$ 189,90',
-      status: 'Em Trânsito',
-      statusColor: 'bg-blue-500',
-      icon: Truck,
-      items: 2,
-    },
-    {
-      id: '#12343',
-      date: '05/11/2025',
-      total: 'R$ 299,90',
-      status: 'Processando',
-      statusColor: 'bg-yellow-500',
-      icon: Clock,
-      items: 4,
-    },
-  ];
+interface Order {
+  id: number;
+  createdAt: string;
+  status: string;
+  total: number;
+  items?: any[];
+}
+
+export default function MyOrders() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        // Ajuste a rota conforme seu backend. Geralmente algo como /orders/my-orders
+        const response = await api.get('/orders/my-orders');
+        setOrders(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar pedidos:", error);
+        // Se a API ainda não estiver pronta, falha silenciosamente ou mostra toast
+        // toast({ title: "Erro", description: "Não foi possível carregar os pedidos." });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [toast]);
+
+  if (loading) {
+    return <div className="p-8 text-center">Carregando pedidos...</div>;
+  }
 
   return (
-    <AccountLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mj-title mb-2">Meus Pedidos</h1>
-          <p className="text-muted-foreground mj-text">Acompanhe o status dos seus pedidos</p>
-        </div>
-
-        <div className="space-y-4">
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold tracking-tight">Meus Pedidos</h2>
+      
+      {orders.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="flex flex-col items-center justify-center py-10 space-y-4">
+            <div className="bg-muted p-4 rounded-full">
+              <Package className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-medium">Nenhum pedido encontrado</p>
+              <p className="text-sm text-muted-foreground">Você ainda não fez nenhuma compra.</p>
+            </div>
+            <Button asChild>
+              <a href="/category/all">Começar a comprar</a>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
           {orders.map((order) => (
-            <Card key={order.id} className="hover:shadow-lg transition-all duration-300">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-3 rounded-full ${order.statusColor} bg-opacity-10`}>
-                      <order.icon className={`h-6 w-6 ${order.statusColor.replace('bg-', 'text-')}`} />
-                    </div>
-                    <div>
-                      <CardTitle className="mj-text">Pedido {order.id}</CardTitle>
-                      <p className="text-sm text-muted-foreground mj-text">{order.date}</p>
-                    </div>
-                  </div>
-                  <Badge className={order.statusColor}>{order.status}</Badge>
-                </div>
+            <Card key={order.id}>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-base">Pedido #{order.id}</CardTitle>
+                <Badge variant={order.status === "delivered" ? "default" : "secondary"}>
+                  {order.status === "delivered" ? "Entregue" : 
+                   order.status === "processing" ? "Em processamento" : 
+                   order.status === "shipped" ? "Enviado" : order.status}
+                </Badge>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground mj-text">{order.items} {order.items === 1 ? 'item' : 'itens'}</p>
-                    <p className="font-semibold text-lg mj-text">{order.total}</p>
+                <div className="flex justify-between items-center text-sm">
+                  <div className="text-muted-foreground">
+                    Data: {new Date(order.createdAt).toLocaleDateString()}
                   </div>
-                  <button className="text-primary hover:underline mj-text font-semibold">
-                    Ver Detalhes
-                  </button>
+                  <div className="font-medium">
+                    Total: R$ {Number(order.total).toFixed(2).replace('.', ',')}
+                  </div>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
-
-        {orders.length === 0 && (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mj-text mb-2">Nenhum pedido ainda</h3>
-              <p className="text-muted-foreground mj-text">Quando você fizer um pedido, ele aparecerá aqui</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </AccountLayout>
+      )}
+    </div>
   );
-};
-
-export default MyOrders;
+}
