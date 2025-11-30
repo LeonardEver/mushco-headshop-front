@@ -45,7 +45,7 @@ export function AccountSidebar() {
                   <SidebarMenuButton asChild>
                     <Link 
                       to={item.url}
-                      className={`flex items-center px-4 py-3 rounded-lg transition-all duration-300 ${
+                      className={`flex items-center px-2 py-4 rounded-lg transition-all duration-300 ${
                         isActive(item.url)
                           ? 'bg-primary text-primary-foreground font-semibold'
                           : 'hover:bg-muted/50 text-foreground'

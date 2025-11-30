@@ -38,22 +38,22 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/about" element={<About />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/category/:slug" element={<Category />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/carrinho" element={<Cart />} />
+        <Route path="/categoria/:slug" element={<Category />} />
+        <Route path="/produto/:id" element={<ProductDetail />} />
         
         {/* Rotas de Checkout */}
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
 
         {/* Rotas da Conta (dentro do Layout da Conta) */}
-        <Route path="/account" element={<AccountLayout><Outlet /></AccountLayout>}>
+        <Route path="/minha-conta" element={<AccountLayout><Outlet /></AccountLayout>}>
           <Route index element={<Account />} />
-          <Route path="orders" element={<MyOrders />} />
-          <Route path="data" element={<MyData />} />
-          <Route path="address" element={<MyAddress />} />
-          <Route path="favorites" element={<Favorites />} />
-          <Route path="wallet" element={<Wallet />} />
+          <Route path="pedidos" element={<MyOrders />} />
+          <Route path="dados" element={<MyData />} />
+          <Route path="endereco" element={<MyAddress />} />
+          <Route path="favoritos" element={<Favorites />} />
+          <Route path="carteira" element={<Wallet />} />
         </Route>
 
         {/* Rotas de Rodapé */}

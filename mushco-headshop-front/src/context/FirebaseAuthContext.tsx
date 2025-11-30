@@ -4,19 +4,18 @@ import {
   onAuthStateChanged, 
   signInWithPopup, 
   signOut, 
-  createUserWithEmailAndPassword, // Adicionado
-  signInWithEmailAndPassword,     // Adicionado
-  updateProfile,                  // Adicionado para salvar o nome
-  GoogleAuthProvider 
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 import { toast } from 'sonner';
+import api from '@/services/api'; // Importante: Importar sua API
 
-// Definir a interface corretamente
-interface AuthContextType {
+export interface AuthContextType {
   user: FirebaseUser | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>; // Retorna void, tratamos erro dentro ou fora
+  signInWithGoogle: () => Promise<void>;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   registerWithEmail: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -29,14 +28,47 @@ export const FirebaseAuthProvider = ({ children }: { children: React.ReactNode }
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
+  // --- FUNÇÃO DE SINCRONIZAÇÃO (ADICIONADA) ---
+  const syncUserWithBackend = async (firebaseUser: FirebaseUser) => {
+    try {
+      // Monta os dados para enviar ao Backend
+      const userData = {
+        firebaseUid: firebaseUser.uid,
+        email: firebaseUser.email,
+        name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Usuário',
+        avatar: firebaseUser.photoURL || '',
+      };
+
+      console.log('🔄 Sincronizando usuário com o Backend...', userData);
       
-      // Opcional: Aqui você poderia chamar uma rota do backend 
-      // para garantir que o usuário existe no PostgreSQL
-      // ex: if (currentUser) api.post('/auth/sync', { ... })
+      // Chama a rota de criação de usuários (ajuste a rota se necessário)
+      // O endpoint /api/auth/register do seu backend atual espera {name, email, password}
+      // O ideal é ter uma rota /api/auth/sync ou adaptar o middleware para criar automaticamente.
+      // Como seu middleware firebaseProtect JÁ tenta criar, vamos apenas forçar uma chamada
+      // para garantir que o token seja processado.
+      
+      await api.get('/auth/me').catch(() => {
+        // Se /auth/me não existir, tente uma rota protegida leve para disparar o middleware
+        return api.get('/cart'); 
+      });
+
+      console.log('✅ Sincronização concluída (ou usuário já existe).');
+    } catch (error) {
+      console.warn('⚠️ Erro não-bloqueante na sincronização:', error);
+    }
+  };
+  // --------------------------------------------
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      
+      if (currentUser) {
+        // Tenta sincronizar sempre que detectar um usuário logado
+        await syncUserWithBackend(currentUser);
+      }
+      
+      setLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -69,13 +101,17 @@ export const FirebaseAuthProvider = ({ children }: { children: React.ReactNode }
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       
-      // Atualizar o nome do usuário no perfil do Firebase
       if (auth.currentUser) {
         await updateProfile(auth.currentUser, {
           displayName: name
         });
-        // Forçar atualização do estado local
-        setUser({ ...auth.currentUser, displayName: name });
+        
+        // Atualiza estado local
+        const updatedUser = { ...auth.currentUser, displayName: name };
+        setUser(updatedUser as FirebaseUser);
+        
+        // Força a sincronização imediata após registro
+        await syncUserWithBackend(updatedUser as FirebaseUser);
       }
       
       toast.success("Conta criada com sucesso!");

@@ -24,12 +24,10 @@ const Category = () => {
   if (!category) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">Categoria não encontrada</h1>
           <Button onClick={() => navigate('/')}>Voltar ao início</Button>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -53,7 +51,6 @@ const Category = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       
       <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
@@ -149,7 +146,6 @@ const Category = () => {
         )}
       </main>
 
-      <Footer />
     </div>
   );
 };

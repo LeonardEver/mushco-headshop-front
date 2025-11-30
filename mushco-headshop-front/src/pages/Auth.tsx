@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Mail, Lock, User as UserIcon, Eye, EyeOff, Loader2 } from 'lucide-react';
-// import Header from '../components/Header'; // Remova se já estiver no App.tsx para evitar duplicação
-// import Footer from '../components/Footer'; // Remova se já estiver no App.tsx
 import { useAuth } from '@/hooks/useAuth'; // Use o Hook correto
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 
 const Auth = () => {
-  // NÃO usamos mais o dispatch do StoreContext para auth, usamos o useAuth (Firebase)
   const { signInWithGoogle, loginWithEmail, registerWithEmail, isAuthenticated } = useAuth();
   
   const navigate = useNavigate();

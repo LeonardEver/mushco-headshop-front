@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import type { User as FirebaseUser } from 'firebase/auth'; 
 import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
+// src/hooks/useAuth.ts
+import { useContext } from 'react';
+import { FirebaseAuthContext, AuthContextType } from '../context/FirebaseAuthContext';
 
 export const useAuth = () => {
   // CORREÇÃO: Usamos o tipo renomeado 'FirebaseUser'
