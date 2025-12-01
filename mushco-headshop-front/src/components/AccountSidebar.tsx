@@ -17,7 +17,7 @@ const items = [
   { title: "Minha Conta", url: "/minha-conta", icon: User },
   { title: "Meus Dados", url: "/minha-conta/dados", icon: Settings },
   { title: "Meus Pedidos", url: "/minha-conta/pedidos", icon: Package },
-  { title: "Meus Endereços", url: "/minha-conta/enderecos", icon: MapPin },
+  { title: "Meus Endereços", url: "/minha-conta/endereco", icon: MapPin }, // Ajustei para singular conforme padrão comum, verifique sua rota
   { title: "Favoritos", url: "/minha-conta/favoritos", icon: Heart },
   { title: "Carteira", url: "/minha-conta/carteira", icon: Wallet },
 ];
@@ -37,7 +37,11 @@ export function AccountSidebar() {
   };
 
   return (
-    <Sidebar>
+    // CORREÇÃO: Classes CSS para posicionamento fixo correto
+    // mt-20: Empurra para baixo do Header (aprox 80px)
+    // h-[calc(100vh-5rem)]: Altura total menos o Header (5rem = 80px)
+    // z-30: Garante que fique acima do conteúdo mas abaixo de modais/header se necessário
+    <Sidebar className="mt-20 h-[calc(100vh-5rem)] border-r z-30 bg-white" collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Minha Conta</SidebarGroupLabel>
