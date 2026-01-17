@@ -4,9 +4,6 @@ import { Heart, ShoppingCart, Star, Zap, Flame } from 'lucide-react';
 import { Product } from '../types';
 import { useStore } from '../context/StoreContext';
 import { Button } from './ui/button';
-// AVISO: O 'toast' que você está importando é do 'sonner'.
-// O 'StoreContext' usa o 'use-toast' (que é o Toaster do ShadCN).
-// Vou manter o 'sonner' por enquanto, mas saiba que são sistemas diferentes.
 import { toast } from 'sonner';
 
 interface ProductCardProps {
@@ -14,32 +11,26 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  // --- CORREÇÃO AQUI ---
-  // Trocamos state/dispatch pelas funções e dados reais do contexto
   const { isFavorite, toggleFavorite, addToCart } = useStore();
 
-  // Chamamos a função 'isFavorite' do contexto para saber o estado
   const isFav = isFavorite(product.id);
-  // --- FIM DA CORREÇÃO ---
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // --- CORREÇÃO AQUI ---
-    // Usamos a função 'addToCart' (productId, quantity)
     addToCart(product.id, 1);
     toast.success(`${product.name} adicionado ao carrinho! 🛒`);
   };
+
+  const displayImage = 
+    product.image && product.image !== "" ? product.image : 
+    (product.images && product.images.length > 0 ? product.images[0] : "/placeholder.svg");
 
   const handleToggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // --- CORREÇÃO AQUI ---
-    // Apenas chamamos a função 'toggleFavorite'
     toggleFavorite(product.id);
-
-    // O 'StoreContext' não tem toasts para favoritos, então mantemos estes.
     if (isFav) {
       toast.info('Removido dos favoritos 💔');
     } else {
@@ -57,7 +48,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Link to={`/produto/${product.id}`} className="block group">
       <div className="mj-card p-0 overflow-hidden transform hover:scale-105 transition-all duration-300 relative">
-        {/* Badges */}
         <div className="absolute top-3 left-3 z-20 flex flex-col space-y-2">
           {product.isBestSeller && (
             <span className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center space-x-1 animate-pulse shadow-lg">
@@ -85,8 +75,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         >
           <Heart 
             className={`w-5 h-5 transition-colors ${
-              // --- CORREÇÃO AQUI ---
-              // Usamos a variável 'isFav'
               isFav ? 'fill-red-500 text-red-500' : 'text-white hover:text-red-400'
             }`} 
           />

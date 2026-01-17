@@ -15,16 +15,15 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 
-const Header = () => {
+export const Header = () => {
   
   const { data: categories = [] } = useCategories();
   const { cart, favorites } = useStore();
   const { isAuthenticated, user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
-
-  
 
   const cartItemsCount = cart?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
   const favoritesCount = favorites?.length ?? 0;
@@ -32,9 +31,8 @@ const Header = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/buscar?q=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery('');
+    if (searchTerm.trim()) {
+      navigate(`/busca?q=${encodeURIComponent(searchTerm)}`);
     }
   };
 
@@ -81,24 +79,17 @@ const Header = () => {
             </Link>
 
             {/* Search Bar */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-md mx-4 hidden md:block">
-              <div className="relative group">
-                <Input
-                  type="text"
-                  placeholder="Buscar produtos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pr-12 bg-white border-white/30 text-gray-800 placeholder-gray-500 focus:bg-white focus:border-green-400 transition-all duration-300 mj-text"
-                />
-                <Button 
-                  type="submit" 
-                  size="sm" 
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-10 p-0 btn-mj-primary"
-                >
-                  <Search className="w-4 h-4" />
-                </Button>
-              </div>
-            </form>
+            <form onSubmit={handleSearch} className="hidden lg:flex items-center flex-1 max-w-md mx-4 relative">
+                      <Input 
+                        placeholder="O que você procura?" 
+                        className="w-full pr-10 bg-secondary/10 border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                      <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Search className="w-4 h-4 text-muted-foreground hover:text-primary" />
+                      </button>
+                    </form>
 
             {/* Desktop User Actions */}
             <div className="hidden md:flex items-center space-x-3">

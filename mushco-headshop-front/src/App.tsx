@@ -2,6 +2,7 @@ import { Routes, Route, Outlet } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
+import Search from "./pages/Search";
 import Index from './pages/Index';
 import About from './pages/About';
 import Cart from './pages/Cart';
@@ -29,6 +30,7 @@ function App() {
     <>
       <Header />
       <Routes>
+        <Route path="/busca" element={<Search />} />
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/about" element={<About />} />
