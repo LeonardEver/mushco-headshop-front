@@ -1,10 +1,7 @@
-import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-// CORREÇÃO: Adicionado 'Shield' nos imports abaixo
 import { Trash2, Plus, Minus, ArrowLeft, ShoppingBag, Shield } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { Button } from '../components/ui/button';
-import { toast } from 'sonner';
 
 const Cart = () => {
   const { cart, removeFromCart, updateCartQuantity, getCartTotal } = useStore();
@@ -28,6 +25,7 @@ const Cart = () => {
       currency: 'BRL'
     }).format(price);
   };
+
 
   if (!cart || cart.length === 0) {
     return (

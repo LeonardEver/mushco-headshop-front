@@ -94,7 +94,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-gray-400">
-              © 2024 Mush Co. Todos os direitos reservados.
+              ©  Mush Co. Todos os direitos reservados.
             </div>
             <div className="flex space-x-6 text-sm">
               <Link to="/privacidade" className="text-gray-400 hover:text-white transition-colors">

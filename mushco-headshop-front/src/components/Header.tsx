@@ -166,7 +166,7 @@ const Header = () => {
               )}
 
               {/* Favorites */}
-              <Link to="/favoritos" className="relative p-3 hover:bg-white/20 rounded-lg transition-all duration-300 group">
+              <Link to="/minha-conta/favoritos" className="relative p-3 hover:bg-white/20 rounded-lg transition-all duration-300 group">
                 <Heart className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-300" />
                 {favoritesCount > 0 && (
                   <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">
@@ -192,7 +192,7 @@ const Header = () => {
               {isAuthenticated ? (
                 <>
                   {/* Favorites */}
-                  <Link to="/favoritos" className="relative p-3 hover:bg-white/20 rounded-lg transition-all duration-300 group">
+                  <Link to="/minha-conta/favoritos" className="relative p-3 hover:bg-white/20 rounded-lg transition-all duration-300 group">
                     <Heart className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-300" />
                     {favoritesCount > 0 && (
                       <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-pulse">

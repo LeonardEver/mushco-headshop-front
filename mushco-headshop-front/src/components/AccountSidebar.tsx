@@ -41,7 +41,7 @@ export function AccountSidebar() {
     // mt-20: Empurra para baixo do Header (aprox 80px)
     // h-[calc(100vh-5rem)]: Altura total menos o Header (5rem = 80px)
     // z-30: Garante que fique acima do conteúdo mas abaixo de modais/header se necessário
-    <Sidebar className="mt-20 h-[calc(100vh-5rem)] border-r z-30 bg-white" collapsible="icon">
+    <Sidebar className="mt-40 h-[calc(100vh-5rem)] border-r z-30 bg-white" collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Minha Conta</SidebarGroupLabel>

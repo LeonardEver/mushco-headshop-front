@@ -33,11 +33,10 @@ function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/about" element={<About />} />
         
-        {/* CORREÇÃO: As rotas devem estar em PORTUGUÊS para bater com os links do site */}
         <Route path="/carrinho" element={<Cart />} />
         
-        {/* AQUI ESTÁ O FIX PARA O ERRO 404: */}
         <Route path="/categoria/:slug" element={<Category />} />
+        <Route path="/ofertas" element={<Category />} />
         
         <Route path="/produto/:id" element={<ProductDetail />} />
         
