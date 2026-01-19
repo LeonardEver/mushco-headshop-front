@@ -16,7 +16,7 @@ const Category = () => {
   // Estados que estavam faltando
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [category, setCategory] = useState<CategoryType | null>(null); // Armazena o objeto completo da categoria
+  const [category, setCategory] = useState<CategoryType | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('relevance');
 
@@ -46,6 +46,7 @@ const Category = () => {
           setProducts(productsResponse.data.data || []);
         } else {
           // Lógica especial para rota de "Ofertas"
+          
       
         }
 

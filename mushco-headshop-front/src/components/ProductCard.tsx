@@ -22,6 +22,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     toast.success(`${product.name} adicionado ao carrinho! 🛒`);
   };
 
+  // Lógica para garantir que pegamos uma imagem válida
   const displayImage = 
     product.image && product.image !== "" ? product.image : 
     (product.images && product.images.length > 0 ? product.images[0] : "/placeholder.svg");
@@ -80,15 +81,20 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           />
         </button>
 
-        {/* Product Image Placeholder */}
-        <div className="aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 relative">
-          <div className="w-full h-full flex items-center justify-center relative">
-            <div className="w-24 h-24 bg-gray-300 rounded-lg flex items-center justify-center">
-              <span className="text-gray-500 text-sm mj-text">Imagem</span>
-            </div>
-          </div>
+        {/* Product Image Area */}
+        <div className="aspect-square overflow-hidden bg-white relative">
+          {/* CORREÇÃO AQUI: Substituímos o placeholder fixo pela tag IMG real */}
+          <img 
+            src={displayImage} 
+            alt={product.name}
+            className="w-full h-full object-cover object-center transform group-hover:scale-110 transition-transform duration-500"
+            onError={(e) => {
+              // Fallback caso a imagem quebre
+              e.currentTarget.src = "/placeholder.svg";
+            }}
+          />
           
-          {/* Hover overlay */}
+          {/* Hover overlay com botão Comprar */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300">
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <Button

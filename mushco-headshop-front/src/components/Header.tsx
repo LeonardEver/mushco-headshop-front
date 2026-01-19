@@ -82,7 +82,7 @@ export const Header = () => {
             <form onSubmit={handleSearch} className="hidden lg:flex items-center flex-1 max-w-md mx-4 relative">
                       <Input 
                         placeholder="O que você procura?" 
-                        className="w-full pr-10 bg-secondary/10 border-none focus-visible:ring-1 focus-visible:ring-primary"
+                        className="w-full pr-10 bg-secondary/10 border-none focus-visible:ring-1 focus-visible:ring-primary text-white placeholder-white mj-text"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
